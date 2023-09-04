@@ -1,33 +1,49 @@
 package com.example.springsecurity.controllers;
 
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import com.example.springsecurity.payloads.requests.UpdateUserRequest;
+import com.example.springsecurity.services.AdminService;
+import com.example.springsecurity.services.UserService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+
 @RestController
 @RequestMapping("/api/v1/admin")
+@RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
+    private final AdminService adminService;
+    private final UserService userService;
 
     @GetMapping
     @PreAuthorize("hasAuthority('admin:read')")
     public String get() {
         return "GET:: admin controller";
     }
+
     @PostMapping
     @PreAuthorize("hasAuthority('admin:create')")
     public String post() {
         return "POST:: admin controller";
     }
+
     @PutMapping
     @PreAuthorize("hasAuthority('admin:update')")
-    public String put() {
-        return "PUT:: admin controller";
+    public String put(
+            @RequestBody UpdateUserRequest request,
+            @RequestParam("userId") Integer userId
+    ) {
+        return userService.updateUser(request, userId);
     }
+
     @DeleteMapping
     @PreAuthorize("hasAuthority('admin:delete')")
-    public String delete() {
-        return "DELETE:: admin controller";
+    public ResponseEntity<String> delete(
+            @RequestParam("userId") Integer userId
+    ) {
+        return new ResponseEntity<>(adminService.disableUser(userId));
     }
+
 }
